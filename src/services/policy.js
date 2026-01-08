@@ -34,7 +34,7 @@ export const uploadPolicy = async (policyName, policyFile) => {
     formData.append("name", policyName);
     formData.append("document", policyFile);
 
-    const response = await authApi.post("/policies/", formData, {
+    const response = await authApi.post("/policies/upload/", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },
@@ -70,13 +70,16 @@ export const deletePolicy = async (policyId) => {
 };
 
 // Verify policy
-export const verifyPolicy = async (policyId) => {
+export const verifyPolicy = async (policyId, verifiedData) => {
   try {
-    const response = await authApi.post(`/policies/${policyId}/verify/`);
+    const response = await authApi.post(
+      `/policies/${policyId}/verify/`,
+      verifiedData
+    );
     return response.data;
   } catch (error) {
     console.error("Failed to verify policy:", error);
-    throw new Error("Failed to verify policy.");
+    throw new Error(error.response?.data?.error || "Failed to verify policy.");
   }
 };
 
@@ -96,7 +99,7 @@ export const getExtractionStatus = async (policyId) => {
 // Get dashboard stats
 export const getDashboardStats = async () => {
   try {
-    const response = await authApi.get("/policies/dashboard-stats/");
+    const response = await authApi.get("/policies/dashboard/");
     return response.data;
   } catch (error) {
     console.error("Failed to get dashboard stats:", error);

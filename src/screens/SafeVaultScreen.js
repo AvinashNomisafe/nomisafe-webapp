@@ -1,41 +1,40 @@
 /* Safe Vault Screen */
 
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import Layout from "../components/Layout";
 import AppHeader from "../components/AppHeader";
-import BottomNavigation from "../components/BottomNavigation";
 
 const SafeVaultScreen = () => {
-  const navigate = useNavigate();
-
   return (
-    <div className="screen">
+    <Layout>
       <AppHeader title="Safe Vault" showBack={false} />
-      <div className="container">
-        <div className="card">
-          <h2>🔒 Safe Vault</h2>
-          <p>Your secure storage for all insurance documents.</p>
-          <button
-            className="btn btn-primary"
-            onClick={() => navigate("/my-policy")}
-            style={{ marginTop: "16px" }}
-          >
-            View All Documents
-          </button>
-        </div>
-        <div className="card">
-          <h3>Features</h3>
-          <ul style={{ paddingLeft: "20px", lineHeight: "1.8" }}>
-            <li>Secure cloud storage</li>
-            <li>Easy access anytime</li>
-            <li>Organized by policy type</li>
-            <li>Quick search and filter</li>
-          </ul>
-        </div>
+      <div style={styles.content}>
+        <h1 style={styles.title}>Safe Vault</h1>
+        <div style={styles.banner}>COMING SOON</div>
       </div>
-      <BottomNavigation />
-    </div>
+    </Layout>
   );
+};
+
+const styles = {
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "calc(100vh - 200px)",
+  },
+  title: {
+    fontSize: "32px",
+    fontWeight: "bold",
+    marginBottom: "16px",
+    margin: 0,
+  },
+  banner: {
+    fontSize: "24px",
+    color: "#4DB6AC",
+    fontWeight: "600",
+  },
 };
 
 export default SafeVaultScreen;

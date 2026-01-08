@@ -177,7 +177,7 @@ export const updateUserProfile = async (profileData) => {
 // Delete account
 export const deleteAccount = async () => {
   try {
-    await authApi.delete("/auth/delete-account/");
+    await authApi.delete("/delete-account/");
     await clearAuthData();
   } catch (error) {
     console.error("Failed to delete account:", error);

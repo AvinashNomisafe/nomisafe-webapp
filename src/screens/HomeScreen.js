@@ -13,6 +13,14 @@ import tutorialsIcon from "../assets/icons/tutorials_icon.png";
 import marketing1 from "../assets/images/marketing_1.png";
 import marketing2 from "../assets/images/marketing_2.png";
 import marketing3 from "../assets/images/marketing_3.png";
+import ShieldIcon from "@mui/icons-material/Security";
+import CashIcon from "@mui/icons-material/Payments";
+import HeartPulseIcon from "@mui/icons-material/Favorite";
+import MedicalBagIcon from "@mui/icons-material/MedicalServices";
+import CalendarClockIcon from "@mui/icons-material/EventAvailable";
+import ClockOutlineIcon from "@mui/icons-material/AccessTime";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ChartIcon from "@mui/icons-material/BarChart";
 
 const HomeScreen = () => {
   const navigate = useNavigate();
@@ -253,6 +261,15 @@ const HomeScreen = () => {
     return `₹${amount?.toLocaleString("en-IN") || 0}`;
   };
 
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-IN", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
   const renderDashboard = () => {
     if (isLoadingDashboard) {
       return (
@@ -277,20 +294,27 @@ const HomeScreen = () => {
             Your financial overview and analytics
           </p>
           <div style={styles.emptyStateContainer}>
-            <span style={styles.emptyStateIcon}>📊</span>
+            <ChartIcon style={{ fontSize: 64, color: "#ccc" }} />
             <p style={styles.emptyStateText}>No data available</p>
           </div>
         </div>
       );
     }
 
-    const { summary, life_insurance, health_insurance } = dashboardStats;
+    const {
+      summary,
+      life_insurance,
+      health_insurance,
+      upcoming_renewals,
+      recent_policies,
+    } = dashboardStats;
 
     return (
       <div style={styles.dashboardContainer}>
+        {/* Summary Cards */}
         <div style={styles.summaryGrid}>
           <div style={{ ...styles.summaryCard, ...styles.summaryCardPrimary }}>
-            <span style={styles.summaryCardIcon}>🛡️</span>
+            <ShieldIcon style={{ fontSize: 32, color: "#fff" }} />
             <span style={styles.summaryCardValue}>
               {summary?.total_policies || 0}
             </span>
@@ -299,7 +323,7 @@ const HomeScreen = () => {
           <div
             style={{ ...styles.summaryCard, ...styles.summaryCardSecondary }}
           >
-            <span style={styles.summaryCardIcon}>💰</span>
+            <CashIcon style={{ fontSize: 32, color: "#fff" }} />
             <span style={styles.summaryCardValue}>
               {formatCurrency(summary?.total_monthly_premium)}
             </span>
@@ -307,10 +331,11 @@ const HomeScreen = () => {
           </div>
         </div>
 
+        {/* Life Insurance Stats */}
         {life_insurance && life_insurance.total_policies > 0 && (
           <div style={styles.statsSection}>
             <div style={styles.statsSectionHeader}>
-              <span style={styles.sectionIcon}>❤️</span>
+              <HeartPulseIcon style={{ fontSize: 24, color: "#E91E63" }} />
               <span style={styles.statsSectionTitle}>Life Insurance</span>
             </div>
             <div style={styles.statsGrid}>
@@ -344,10 +369,11 @@ const HomeScreen = () => {
           </div>
         )}
 
+        {/* Health Insurance Stats */}
         {health_insurance && health_insurance.total_policies > 0 && (
           <div style={styles.statsSection}>
             <div style={styles.statsSectionHeader}>
-              <span style={styles.sectionIcon}>🏥</span>
+              <MedicalBagIcon style={{ fontSize: 24, color: "#4CAF50" }} />
               <span style={styles.statsSectionTitle}>Health Insurance</span>
             </div>
             <div style={styles.statsGrid}>
@@ -370,6 +396,94 @@ const HomeScreen = () => {
                 </span>
               </div>
             </div>
+          </div>
+        )}
+
+        {/* Upcoming Renewals */}
+        {upcoming_renewals && upcoming_renewals.length > 0 && (
+          <div style={styles.renewalsSection}>
+            <div style={styles.renewalsSectionHeader}>
+              <CalendarClockIcon style={{ fontSize: 24, color: "#FF9800" }} />
+              <span style={styles.renewalsSectionTitle}>Upcoming Renewals</span>
+            </div>
+            {upcoming_renewals.map((renewal) => (
+              <div
+                key={renewal.id}
+                style={styles.renewalItem}
+                onClick={() => navigate(`/policy/${renewal.id}`)}
+              >
+                <div style={styles.renewalItemLeft}>
+                  <div style={styles.renewalItemName}>{renewal.name}</div>
+                  <div style={styles.renewalItemInsurer}>
+                    {renewal.insurer_name}
+                  </div>
+                  <div style={styles.renewalItemPremium}>
+                    Premium: {formatCurrency(renewal.premium_amount)}
+                  </div>
+                </div>
+                <div style={styles.renewalItemRight}>
+                  <div
+                    style={{
+                      ...styles.renewalBadge,
+                      ...(renewal.days_remaining <= 30
+                        ? styles.renewalBadgeUrgent
+                        : {}),
+                    }}
+                  >
+                    {renewal.days_remaining} days
+                  </div>
+                  <div style={styles.renewalItemDate}>
+                    {formatDate(renewal.end_date)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Recent Policies */}
+        {recent_policies && recent_policies.length > 0 && (
+          <div style={styles.recentSection}>
+            <div style={styles.recentSectionHeader}>
+              <ClockOutlineIcon style={{ fontSize: 24, color: "#2196F3" }} />
+              <span style={styles.recentSectionTitle}>Recent Policies</span>
+            </div>
+            {recent_policies.map((policy) => (
+              <div
+                key={policy.id}
+                style={styles.recentItem}
+                onClick={() => navigate(`/policy/${policy.id}`)}
+              >
+                <div style={styles.recentItemLeft}>
+                  <div
+                    style={{
+                      ...styles.recentItemIcon,
+                      ...(policy.insurance_type === "LIFE"
+                        ? styles.recentItemIconLife
+                        : styles.recentItemIconHealth),
+                    }}
+                  >
+                    {policy.insurance_type === "LIFE" ? (
+                      <HeartPulseIcon style={{ fontSize: 20, color: "#fff" }} />
+                    ) : (
+                      <MedicalBagIcon style={{ fontSize: 20, color: "#fff" }} />
+                    )}
+                  </div>
+                  <div>
+                    <div style={styles.recentItemName}>{policy.name}</div>
+                    <div style={styles.recentItemInsurer}>
+                      {policy.insurer_name}
+                    </div>
+                  </div>
+                </div>
+                <div style={styles.recentItemRight}>
+                  <div style={styles.recentItemAmount}>
+                    {formatCurrency(policy.sum_assured)}
+                  </div>
+                  <ChevronRightIcon style={{ fontSize: 24, color: "#ccc" }} />
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -652,9 +766,6 @@ const styles = {
     paddingTop: 60,
     paddingBottom: 60,
   },
-  emptyStateIcon: {
-    fontSize: 64,
-  },
   emptyStateText: {
     marginTop: 16,
     fontSize: 16,
@@ -680,9 +791,6 @@ const styles = {
   summaryCardSecondary: {
     backgroundColor: "#FF9800",
   },
-  summaryCardIcon: {
-    fontSize: 32,
-  },
   summaryCardValue: {
     fontSize: 24,
     fontWeight: "bold",
@@ -707,14 +815,11 @@ const styles = {
     alignItems: "center",
     marginBottom: 16,
   },
-  sectionIcon: {
-    fontSize: 24,
-    marginRight: 8,
-  },
   statsSectionTitle: {
     fontSize: 18,
     fontWeight: "600",
     color: "#000",
+    marginLeft: 8,
   },
   statsGrid: {
     display: "flex",
@@ -738,6 +843,140 @@ const styles = {
     fontWeight: "600",
     color: "#000",
     display: "block",
+  },
+  renewalsSection: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+  },
+  renewalsSectionHeader: {
+    display: "flex",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  renewalsSectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#000",
+    marginLeft: 8,
+  },
+  renewalItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 16,
+    paddingBottom: 16,
+    borderBottom: "1px solid #F0F0F0",
+    cursor: "pointer",
+  },
+  renewalItemLeft: {
+    flex: 1,
+  },
+  renewalItemName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000",
+    marginBottom: 4,
+  },
+  renewalItemInsurer: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 4,
+  },
+  renewalItemPremium: {
+    fontSize: 13,
+    color: "#4DB6AC",
+    fontWeight: "500",
+  },
+  renewalItemRight: {
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "flex-end",
+  },
+  renewalBadge: {
+    backgroundColor: "#4CAF50",
+    borderRadius: 12,
+    padding: "6px 12px",
+    marginBottom: 6,
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  renewalBadgeUrgent: {
+    backgroundColor: "#FF5722",
+  },
+  renewalItemDate: {
+    fontSize: 13,
+    color: "#666",
+  },
+  recentSection: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 16,
+    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+  },
+  recentSectionHeader: {
+    display: "flex",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  recentSectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#000",
+    marginLeft: 8,
+  },
+  recentItem: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 16,
+    paddingBottom: 16,
+    borderBottom: "1px solid #F0F0F0",
+    cursor: "pointer",
+  },
+  recentItemLeft: {
+    display: "flex",
+    alignItems: "center",
+    flex: 1,
+  },
+  recentItemIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  recentItemIconLife: {
+    backgroundColor: "#E91E63",
+  },
+  recentItemIconHealth: {
+    backgroundColor: "#4CAF50",
+  },
+  recentItemName: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000",
+    marginBottom: 4,
+  },
+  recentItemInsurer: {
+    fontSize: 14,
+    color: "#666",
+  },
+  recentItemRight: {
+    display: "flex",
+    alignItems: "center",
+  },
+  recentItemAmount: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#4DB6AC",
+    marginRight: 8,
   },
 };
 

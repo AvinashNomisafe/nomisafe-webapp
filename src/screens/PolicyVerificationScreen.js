@@ -1,135 +1,372 @@
-/* Policy Verification Screen - Upload Policy */
+/* Policy Verification Screen - Verify AI Extracted Data */
 
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+import Layout from "../components/Layout";
 import AppHeader from "../components/AppHeader";
-import BottomNavigation from "../components/BottomNavigation";
-import { uploadPolicy } from "../services/policy";
-import "./PolicyVerificationScreen.css";
+import { verifyPolicy } from "../services/policy";
 
 const PolicyVerificationScreen = () => {
   const navigate = useNavigate();
-  const [policyName, setPolicyName] = useState("");
-  const [policyFile, setPolicyFile] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const location = useLocation();
+  const { policyId, extractedData } = location.state || {};
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.type === "application/pdf") {
-        setPolicyFile(file);
-        setError("");
-      } else {
-        setError("Please select a PDF file");
-        setPolicyFile(null);
-      }
-    }
-  };
+  // State for editable fields
+  const [insuranceType, setInsuranceType] = useState(
+    extractedData?.insurance_type || ""
+  );
+  const [policyNumber, setPolicyNumber] = useState(
+    extractedData?.policy_number || ""
+  );
+  const [sumAssured, setSumAssured] = useState(
+    extractedData?.coverage?.sum_assured?.toString() || ""
+  );
+  const [premiumAmount, setPremiumAmount] = useState(
+    extractedData?.coverage?.premium_amount?.toString() || ""
+  );
+  const [nomineeName, setNomineeName] = useState(
+    extractedData?.nominees?.[0]?.name || ""
+  );
+  const [nomineeRelationship, setNomineeRelationship] = useState(
+    extractedData?.nominees?.[0]?.relationship || ""
+  );
 
-  const handleUpload = async (e) => {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleVerify = async (e) => {
     e.preventDefault();
 
-    if (!policyName) {
-      setError("Please enter a policy name");
+    // Validate required fields
+    if (!policyNumber.trim()) {
+      alert("Policy number is required");
       return;
     }
 
-    if (!policyFile) {
-      setError("Please select a policy document");
+    if (!sumAssured.trim() || isNaN(Number(sumAssured))) {
+      alert("Please enter a valid sum assured amount");
       return;
     }
 
-    setLoading(true);
-    setError("");
+    if (!premiumAmount.trim() || isNaN(Number(premiumAmount))) {
+      alert("Please enter a valid premium amount");
+      return;
+    }
 
     try {
-      await uploadPolicy(policyName, policyFile);
-      alert("Policy uploaded successfully! AI extraction in progress...");
-      navigate("/my-policy");
-    } catch (err) {
-      setError(err.message || "Failed to upload policy");
+      setIsLoading(true);
+
+      // Prepare verified data
+      const verifiedData = {
+        ...extractedData,
+        insurance_type: insuranceType,
+        policy_number: policyNumber,
+        coverage: {
+          ...extractedData.coverage,
+          sum_assured: Number(sumAssured),
+          premium_amount: Number(premiumAmount),
+        },
+      };
+
+      // Update nominees if provided
+      if (nomineeName.trim()) {
+        verifiedData.nominees = [
+          {
+            name: nomineeName,
+            relationship: nomineeRelationship || "Unknown",
+            allocation_percentage:
+              extractedData.nominees?.[0]?.allocation_percentage || 100,
+          },
+        ];
+      }
+
+      // Call verify API
+      await verifyPolicy(policyId, verifiedData);
+
+      alert("Policy verified and saved successfully!");
+
+      // Navigate back to appropriate insurance screen based on type
+      if (insuranceType === "LIFE") {
+        navigate("/life-insurance");
+      } else if (insuranceType === "HEALTH") {
+        navigate("/health-insurance");
+      } else {
+        navigate("/home");
+      }
+    } catch (error) {
+      console.error("Verification error:", error);
+      alert(error.message || "Failed to verify policy. Please try again.");
     } finally {
-      setLoading(false);
+      setIsLoading(false);
     }
   };
 
-  return (
-    <div className="policy-verification-screen">
-      <AppHeader title="Upload Policy" showBack={true} />
+  const formatInsuranceType = (type) => {
+    if (type === "LIFE") return "Life Insurance";
+    if (type === "HEALTH") return "Health Insurance";
+    return type;
+  };
 
-      <div className="container">
-        <div className="upload-card">
-          <div className="upload-header">
-            <div className="upload-icon">📤</div>
-            <h2>Upload Your Policy</h2>
-            <p>Upload your insurance policy document for AI extraction</p>
+  if (!policyId || !extractedData) {
+    return (
+      <Layout>
+        <AppHeader showBackButton={true} showMenu={true} />
+        <div style={styles.container}>
+          <div style={styles.content}>
+            <p style={styles.errorText}>
+              No policy data available for verification
+            </p>
+            <button style={styles.button} onClick={() => navigate("/home")}>
+              Go to Home
+            </button>
           </div>
+        </div>
+      </Layout>
+    );
+  }
 
-          <form onSubmit={handleUpload}>
-            <div className="form-group">
-              <label className="form-label">Policy Name</label>
-              <input
-                type="text"
-                className="form-input"
-                placeholder="e.g., HDFC Life Insurance"
-                value={policyName}
-                onChange={(e) => {
-                  setPolicyName(e.target.value);
-                  setError("");
-                }}
-                disabled={loading}
-              />
-            </div>
+  return (
+    <Layout>
+      <AppHeader showBackButton={true} showMenu={true} />
+      <div style={styles.container}>
+        <div style={styles.content}>
+          <div style={styles.iconContainer}>✅</div>
+          <h1 style={styles.pageTitle}>Verify Policy Details</h1>
+          <p style={styles.subtitle}>
+            Please review and edit the extracted information
+          </p>
 
-            <div className="form-group">
-              <label className="form-label">Policy Document (PDF)</label>
-              <div className="file-input-container">
-                <input
-                  type="file"
-                  id="file-input"
-                  accept="application/pdf"
-                  onChange={handleFileChange}
-                  disabled={loading}
-                  style={{ display: "none" }}
-                />
-                <label htmlFor="file-input" className="file-input-label">
-                  <span className="file-icon">📄</span>
-                  <span className="file-text">
-                    {policyFile ? policyFile.name : "Choose PDF file"}
-                  </span>
-                </label>
+          <form style={styles.form} onSubmit={handleVerify}>
+            <div style={styles.fieldContainer}>
+              <label style={styles.label}>Insurance Type</label>
+              <div style={styles.readOnlyField}>
+                <span style={styles.readOnlyText}>
+                  {formatInsuranceType(insuranceType)}
+                </span>
               </div>
             </div>
 
-            {error && <p className="form-error">{error}</p>}
+            <div style={styles.fieldContainer}>
+              <label style={styles.label}>
+                Policy Number <span style={styles.required}>*</span>
+              </label>
+              <input
+                style={styles.input}
+                type="text"
+                value={policyNumber}
+                onChange={(e) => setPolicyNumber(e.target.value)}
+                placeholder="Enter policy number"
+                required
+              />
+            </div>
 
-            <button
-              type="submit"
-              className={`btn btn-primary btn-full ${
-                loading ? "btn-disabled" : ""
-              }`}
-              disabled={loading}
-            >
-              {loading ? "Uploading..." : "Upload Policy"}
-            </button>
+            <div style={styles.fieldContainer}>
+              <label style={styles.label}>
+                Sum Assured (₹) <span style={styles.required}>*</span>
+              </label>
+              <input
+                style={styles.input}
+                type="number"
+                value={sumAssured}
+                onChange={(e) => setSumAssured(e.target.value)}
+                placeholder="Enter sum assured"
+                required
+              />
+            </div>
+
+            <div style={styles.fieldContainer}>
+              <label style={styles.label}>
+                Premium Amount (₹) <span style={styles.required}>*</span>
+              </label>
+              <input
+                style={styles.input}
+                type="number"
+                value={premiumAmount}
+                onChange={(e) => setPremiumAmount(e.target.value)}
+                placeholder="Enter premium amount"
+                required
+              />
+            </div>
+
+            <div style={styles.divider} />
+
+            <h3 style={styles.sectionTitle}>Nominee Details</h3>
+
+            <div style={styles.fieldContainer}>
+              <label style={styles.label}>Nominee Name</label>
+              <input
+                style={styles.input}
+                type="text"
+                value={nomineeName}
+                onChange={(e) => setNomineeName(e.target.value)}
+                placeholder="Enter nominee name"
+              />
+            </div>
+
+            <div style={styles.fieldContainer}>
+              <label style={styles.label}>Relationship</label>
+              <input
+                style={styles.input}
+                type="text"
+                value={nomineeRelationship}
+                onChange={(e) => setNomineeRelationship(e.target.value)}
+                placeholder="e.g., Spouse, Son, Daughter"
+              />
+            </div>
+
+            <div style={styles.buttonContainer}>
+              <button
+                type="button"
+                style={styles.cancelButton}
+                onClick={() => navigate(-1)}
+                disabled={isLoading}
+              >
+                Cancel
+              </button>
+
+              <button
+                type="submit"
+                style={{
+                  ...styles.verifyButton,
+                  ...(isLoading && styles.buttonDisabled),
+                }}
+                disabled={isLoading}
+              >
+                {isLoading ? "Verifying..." : "Verify & Save"}
+              </button>
+            </div>
           </form>
-
-          <div className="upload-info">
-            <h4>What happens next?</h4>
-            <ul>
-              <li>📄 Your policy document will be uploaded securely</li>
-              <li>🤖 AI will extract key information automatically</li>
-              <li>✅ Review and verify the extracted details</li>
-              <li>💾 Policy will be saved in your vault</li>
-            </ul>
-          </div>
         </div>
       </div>
-
-      <BottomNavigation />
-    </div>
+    </Layout>
   );
+};
+
+const styles = {
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  content: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  iconContainer: {
+    fontSize: 48,
+    textAlign: "center",
+    margin: "16px 0",
+  },
+  pageTitle: {
+    fontSize: 28,
+    fontWeight: "bold",
+    marginBottom: 8,
+    textAlign: "center",
+    color: "#000",
+  },
+  subtitle: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  form: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    padding: 20,
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+  },
+  fieldContainer: {
+    marginBottom: 20,
+  },
+  label: {
+    fontSize: 16,
+    color: "#333",
+    marginBottom: 8,
+    fontWeight: "500",
+    display: "block",
+  },
+  required: {
+    color: "#E74C3C",
+  },
+  input: {
+    width: "100%",
+    border: "1px solid #ddd",
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 16,
+    color: "#000",
+    backgroundColor: "#fff",
+    boxSizing: "border-box",
+  },
+  readOnlyField: {
+    backgroundColor: "#f5f5f5",
+    borderRadius: 8,
+    padding: 12,
+    border: "1px solid #e0e0e0",
+  },
+  readOnlyText: {
+    fontSize: 16,
+    color: "#333",
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#e0e0e0",
+    margin: "20px 0",
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#000",
+    marginBottom: 16,
+  },
+  buttonContainer: {
+    display: "flex",
+    gap: 12,
+    marginTop: 24,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: "#fff",
+    color: "#666",
+    padding: 16,
+    borderRadius: 8,
+    border: "1px solid #ddd",
+    fontSize: 16,
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  verifyButton: {
+    flex: 1,
+    backgroundColor: "#4DB6AC",
+    color: "#fff",
+    padding: 16,
+    borderRadius: 8,
+    border: "none",
+    fontSize: 16,
+    fontWeight: "600",
+    cursor: "pointer",
+  },
+  buttonDisabled: {
+    backgroundColor: "#A5D1CB",
+    cursor: "not-allowed",
+  },
+  button: {
+    backgroundColor: "#4DB6AC",
+    color: "#fff",
+    padding: 16,
+    borderRadius: 8,
+    border: "none",
+    fontSize: 16,
+    fontWeight: "600",
+    cursor: "pointer",
+    width: "100%",
+    marginTop: 20,
+  },
+  errorText: {
+    textAlign: "center",
+    color: "#666",
+    fontSize: 16,
+    marginTop: 40,
+  },
 };
 
 export default PolicyVerificationScreen;

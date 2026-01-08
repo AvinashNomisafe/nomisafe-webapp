@@ -1,32 +1,40 @@
 /* Service Screen */
 
 import React from "react";
+import Layout from "../components/Layout";
 import AppHeader from "../components/AppHeader";
-import BottomNavigation from "../components/BottomNavigation";
 
 const ServiceScreen = () => {
   return (
-    <div className="screen">
-      <AppHeader title="Services" showBack={false} />
-      <div className="container">
-        <div className="card">
-          <h2>🔧 Services</h2>
-          <p>Access various insurance-related services and support.</p>
-        </div>
-        <div className="card">
-          <h3>Available Services</h3>
-          <ul style={{ paddingLeft: "20px", lineHeight: "1.8" }}>
-            <li>Policy Consultation</li>
-            <li>Claim Assistance</li>
-            <li>Policy Renewal</li>
-            <li>Document Verification</li>
-            <li>Customer Support</li>
-          </ul>
-        </div>
+    <Layout>
+      <AppHeader title="Service" showBack={false} />
+      <div style={styles.content}>
+        <h1 style={styles.title}>Service</h1>
+        <div style={styles.banner}>COMING SOON</div>
       </div>
-      <BottomNavigation />
-    </div>
+    </Layout>
   );
+};
+
+const styles = {
+  content: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    minHeight: "calc(100vh - 200px)",
+  },
+  title: {
+    fontSize: "32px",
+    fontWeight: "bold",
+    marginBottom: "16px",
+    margin: 0,
+  },
+  banner: {
+    fontSize: "24px",
+    color: "#4DB6AC",
+    fontWeight: "600",
+  },
 };
 
 export default ServiceScreen;

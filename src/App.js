@@ -105,7 +105,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/policy-detail/:id"
+        path="/policy/:id"
         element={
           <ProtectedRoute>
             <PolicyDetailScreen />
@@ -113,7 +113,7 @@ const AppRoutes = () => {
         }
       />
       <Route
-        path="/policy-verification"
+        path="/verify-policy"
         element={
           <ProtectedRoute>
             <PolicyVerificationScreen />

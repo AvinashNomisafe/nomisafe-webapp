@@ -15,7 +15,6 @@ import {
 } from "@mui/material";
 import { Description } from "@mui/icons-material";
 import AppHeader from "../components/AppHeader";
-import BottomNavigation from "../components/BottomNavigation";
 import Loading from "../components/common/Loading";
 import { getPolicies } from "../services/policy";
 
@@ -219,8 +218,6 @@ const MyPolicyScreen = () => {
           )}
         </Container>
       </Box>
-
-      <BottomNavigation />
     </Box>
   );
 };

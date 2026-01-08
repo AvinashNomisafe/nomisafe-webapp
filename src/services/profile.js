@@ -7,7 +7,7 @@ import { authApi } from "./auth";
 // Get user profile
 export const getProfile = async () => {
   try {
-    const response = await authApi.get("/auth/profile/");
+    const response = await authApi.get("/profile/");
     return response.data;
   } catch (error) {
     console.error("Failed to get profile:", error);
@@ -18,7 +18,7 @@ export const getProfile = async () => {
 // Update user profile
 export const updateProfile = async (profileData) => {
   try {
-    const response = await authApi.put("/auth/profile/", profileData);
+    const response = await authApi.put("/profile/", profileData);
     return response.data;
   } catch (error) {
     console.error("Failed to update profile:", error);

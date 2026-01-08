@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import nomisafeBanner from "../assets/icons/Nomisafe_banner.png";
+import SideMenu from "./SideMenu";
 
 const AppHeader = ({ showBackButton = true, showMenu = true }) => {
   const navigate = useNavigate();
@@ -18,6 +19,8 @@ const AppHeader = ({ showBackButton = true, showMenu = true }) => {
 
   return (
     <>
+      <SideMenu visible={menuVisible} onClose={() => setMenuVisible(false)} />
+
       <div style={styles.header}>
         {/* Left Section - Menu or Back Button */}
         <div style={styles.leftSection}>

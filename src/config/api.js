@@ -11,7 +11,7 @@
 // ============================================
 // CHANGE THIS TO SWITCH ENVIRONMENTS
 // ============================================
-export const DEVICE_TYPE = "DEVELOPMENT"; // 'DEVELOPMENT' or 'PRODUCTION'
+export const DEVICE_TYPE = "PRODUCTION"; // 'DEVELOPMENT' or 'PRODUCTION'
 
 // API URLs
 const LOCAL_API_URL = "http://localhost:8000/api";

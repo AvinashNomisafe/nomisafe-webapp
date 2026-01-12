@@ -50,7 +50,6 @@ const PhoneLoginScreen = () => {
     <Layout backgroundColor="#ffffff">
       <div style={styles.container}>
         <div style={styles.logoWrap}>{/* Logo can be added here */}</div>
-
         <div style={styles.illustration}>
           <img
             src={phoneLoginImage}
@@ -111,10 +110,13 @@ const styles = {
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
+    justifyContent: "center",
+    minHeight: "100vh",
     padding: 24,
-    paddingTop: 100,
     maxWidth: 450,
     width: "100%",
+    margin: "0 auto",
+    backgroundColor: "#fff",
   },
   logoWrap: {
     marginTop: 8,

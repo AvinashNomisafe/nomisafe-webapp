@@ -14,8 +14,8 @@
 export const DEVICE_TYPE = "PRODUCTION"; // 'DEVELOPMENT' or 'PRODUCTION'
 
 // API URLs
-const LOCAL_API_URL = "http://localhost:8000/api";
-const PRODUCTION_API_URL = "http://15.207.247.24/api";
+const LOCAL_API_URL = "/api";
+const PRODUCTION_API_URL = "/api";
 // ============================================
 
 // Get base URL based on environment

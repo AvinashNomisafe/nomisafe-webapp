@@ -14,8 +14,8 @@
 export const DEVICE_TYPE = "PRODUCTION"; // 'DEVELOPMENT' or 'PRODUCTION'
 
 // API URLs
-const LOCAL_API_URL = "/api";
-const PRODUCTION_API_URL = "/api";
+const LOCAL_API_URL = "https://api.nomisafe.in/api";
+const PRODUCTION_API_URL = "https://api.nomisafe.in/api";
 // ============================================
 
 // Get base URL based on environment
